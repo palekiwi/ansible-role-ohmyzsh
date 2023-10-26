@@ -1,7 +1,7 @@
 ---
 - name: Ensure required packages are installed.
   become: true
-  community.general.pacman:
+  ansible.builtin.package:
     name:
       - git
       - zsh
@@ -12,27 +12,28 @@
     repo: https://github.com/ohmyzsh/ohmyzsh.git
     depth: 1
     version: master
-    dest: ~/.oh-my-zsh
+    dest: /home/{{ ansible_user }}/.oh-my-zsh
 
 - name: Clone syntax highlighting repository
   ansible.builtin.git:
     repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
     depth: 1
     version: master
-    dest: ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+    dest: /home/{{ ansible_user }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 
 - name: Clone autosuggestions repository
   ansible.builtin.git:
     repo: https://github.com/zsh-users/zsh-autosuggestions
     depth: 1
     version: master
-    dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+    dest: /home/{{ ansible_user }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 
 - name: Install zsh-notify
+  when: ohmyzsh_gui
   block:
     - name: Install required dependencies
       become: true
-      community.general.pacman:
+      ansible.builtin.package:
         name:
           - libnotify
           - wmctrl
@@ -43,7 +44,7 @@
         repo: https://github.com/marzocchi/zsh-notify.git
         depth: 1
         version: master
-        dest: ~/.oh-my-zsh/custom/plugins/notify
+        dest: /home/{{ ansible_user }}/.oh-my-zsh/custom/plugins/notify
 
 - name: Ensure user shell is set to zsh
   become: true
@@ -54,7 +55,7 @@
 - name: Install zsh configuration template
   ansible.builtin.template:
     src: templates/zshrc.j2
-    dest: ~/.zshrc
+    dest: /home/{{ ansible_user }}/.zshrc
     owner: "{{ ansible_user_id }}"
     group: "{{ ansible_user_id }}"
     mode: "0644"
